@@ -1,4 +1,4 @@
-import { EmbedBuilder, ColorResolvable } from "discord.js";
+import { EmbedBuilder } from "discord.js";
 import type { Blacklist, Warning, FamilyLeader } from "@workspace/db";
 import { formatDate, progressBar } from "./utils.js";
 
@@ -120,5 +120,37 @@ export function leadersEmbed(date: string, leaders: FamilyLeader[]): EmbedBuilde
   ).join("\n");
 
   embed.setDescription(text);
+  return embed;
+}
+
+export function topEmbed(
+  topBl: { nickname: string; count: number }[],
+  topWarn: { nickname: string; count: number }[],
+): EmbedBuilder {
+  const embed = new EmbedBuilder()
+    .setTitle("🏆 Топ нарушителей семьи")
+    .setColor(0xe67e22);
+
+  const medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"];
+
+  if (topBl.length > 0) {
+    const blText = topBl
+      .map((r, i) => `${medals[i] ?? `${i + 1}.`} **${r.nickname}** — ${r.count} ЧС`)
+      .join("\n");
+    embed.addFields({ name: "🛑 Больше всего ЧС", value: blText });
+  } else {
+    embed.addFields({ name: "🛑 Больше всего ЧС", value: "Нет данных" });
+  }
+
+  if (topWarn.length > 0) {
+    const wText = topWarn
+      .map((r, i) => `${medals[i] ?? `${i + 1}.`} **${r.nickname}** — ${r.count} предупр.`)
+      .join("\n");
+    embed.addFields({ name: "⚠️ Больше всего предупреждений", value: wText });
+  } else {
+    embed.addFields({ name: "⚠️ Больше всего предупреждений", value: "Нет данных" });
+  }
+
+  embed.setTimestamp();
   return embed;
 }
