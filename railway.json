@@ -1,0 +1,9 @@
+{
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "pnpm --filter @workspace/api-server run dev",
+    "restartPolicyType": "ON_FAILURE"
+  }
+}
