@@ -1,5 +1,5 @@
 import { ModalSubmitInteraction } from "discord.js";
-import { eq, and, desc, lt } from "drizzle-orm";
+import { eq, and, desc, lt, sql } from "drizzle-orm";
 import { db, schema } from "./db.js";
 import {
   blacklistIssuedEmbed,
@@ -9,6 +9,7 @@ import {
   historyEmbed,
   allBlacklistEmbed,
   leadersEmbed,
+  topEmbed,
 } from "./embeds.js";
 import { addDays, formatDate } from "./utils.js";
 import {
@@ -164,6 +165,30 @@ export async function handleAddLeader(interaction: ModalSubmitInteraction) {
 
   await interaction.reply({ content: `✅ Лидер **${nickname}** (Family: **${family}**) добавлен на ${today}.`, ephemeral: true });
   await auditAddLeader(leader!);
+}
+
+export async function handleTop(channelReply: (opts: any) => Promise<any>) {
+  const topBl = await db
+    .select({
+      nickname: schema.blacklistTable.nickname,
+      count: sql<number>`cast(count(*) as int)`,
+    })
+    .from(schema.blacklistTable)
+    .groupBy(schema.blacklistTable.nickname)
+    .orderBy(desc(sql`count(*)`))
+    .limit(5);
+
+  const topWarn = await db
+    .select({
+      nickname: schema.warningsTable.nickname,
+      count: sql<number>`cast(count(*) as int)`,
+    })
+    .from(schema.warningsTable)
+    .groupBy(schema.warningsTable.nickname)
+    .orderBy(desc(sql`count(*)`))
+    .limit(5);
+
+  await channelReply({ embeds: [topEmbed(topBl, topWarn)] });
 }
 
 export async function expireEntries() {
