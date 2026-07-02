@@ -30,6 +30,7 @@ import {
   handleAllBlacklist,
   handleLeaders,
   handleAddLeader,
+  handleTop,
   expireEntries,
 } from "./handlers.js";
 import { setBotClient } from "./audit.js";
@@ -61,6 +62,10 @@ const commands = [
   new SlashCommandBuilder()
     .setName("добавить-лидера")
     .setDescription("Добавить лидера семьи на сегодня"),
+
+  new SlashCommandBuilder()
+    .setName("топ")
+    .setDescription("Топ-5 игроков с наибольшим количеством ЧС и предупреждений"),
 
   new SlashCommandBuilder()
     .setName("установить-канал-логов")
@@ -118,6 +123,9 @@ export function startBot() {
 
         } else if (name === "добавить-лидера") {
           await interaction.showModal(addLeaderModal());
+
+        } else if (name === "топ") {
+          await handleTop((opts) => interaction.reply(opts));
 
         } else if (name === "установить-канал-логов") {
           const channel = interaction.channel;
